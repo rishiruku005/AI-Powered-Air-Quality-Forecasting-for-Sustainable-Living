@@ -1,0 +1,63 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# === Step 1: True and predicted AQI values (your model) ===
+y_true = [85, 102, 200, 145, 98, 300, 410]        # Actual AQI
+y_pred = [80, 110, 190, 150, 100, 310, 395]       # Predicted AQI by your model
+
+# === Step 2: Previous model metrics (assumed or known) ===
+mae_old = 13.4
+rmse_old = 20.1
+r2_old = 0.63
+
+# === Step 3: Calculate your model's metrics ===
+mae_new = mean_absolute_error(y_true, y_pred)
+rmse_new = np.sqrt(mean_squared_error(y_true, y_pred))
+r2_new = r2_score(y_true, y_pred)
+
+# === Step 4: Compute improvement ratios ===
+mae_ratio = mae_old / mae_new
+rmse_ratio = rmse_old / rmse_new
+r2_gain = r2_new - r2_old
+
+# Print improvement summary
+print("Model Accuracy Comparison:")
+print(f"MAE Improvement Ratio     : {mae_ratio:.2f}x better")
+print(f"RMSE Improvement Ratio    : {rmse_ratio:.2f}x better")
+print(f"R² Score Improvement      : +{r2_gain:.2f}\n")
+
+print("Your Model Metrics:")
+print(f"MAE  = {mae_new:.2f}")
+print(f"RMSE = {rmse_new:.2f}")
+print(f"R²   = {r2_new:.2f}")
+
+# === Step 5: Plot Actual vs Predicted AQI ===
+plt.figure(figsize=(10, 6))
+plt.plot(y_true, label='Actual AQI', marker='o', color='blue', linestyle='--')
+plt.plot(y_pred, label='Predicted AQI', marker='s', color='orange', linestyle='-')
+plt.title('Actual vs Predicted AQI - Your Model')
+plt.xlabel('Sample Index')
+plt.ylabel('AQI')
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# === Step 6: Plot Accuracy Improvement Ratios ===
+metrics = ['MAE', 'RMSE']
+ratios = [mae_ratio, rmse_ratio]
+
+plt.figure(figsize=(8, 5))
+bars = plt.bar(metrics, ratios, color=['teal', 'darkcyan'])
+plt.title('Improvement Ratios Over Previous Model')
+plt.ylabel('Improvement (x times better)')
+plt.ylim(0, max(ratios) + 1)
+
+# Annotate values
+for bar in bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2.0, height + 0.1, f'{height:.2f}x', ha='center', va='bottom')
+
+plt.tight_layout()
+plt.show()
