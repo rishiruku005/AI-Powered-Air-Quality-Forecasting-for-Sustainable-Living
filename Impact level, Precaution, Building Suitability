@@ -1,0 +1,59 @@
+import pandas as pd
+
+# === Step 1: Upload dataset (Only for Google Colab Users) ===
+try:
+    from google.colab import files
+    uploaded = files.upload()  # Manually upload the dataset
+    file_path = list(uploaded.keys())[0]  # Get the uploaded filename
+except ImportError:
+    # If not using Colab, use local path (modify accordingly)
+    file_path = "/mnt/data/city_day.csv"
+
+# === Step 2: Load Dataset ===
+data = pd.read_csv(file_path)
+
+# === Step 3: Check available columns ===
+print("Available columns:", data.columns)
+
+# === Step 4: Group by City/Area and Calculate Average AQI ===
+if 'City' in data.columns:
+    area_aqi = data.groupby('City')['AQI'].mean().reset_index()
+
+    # Function to classify AQI levels and provide precautions
+    def classify_aqi(aqi):
+        if aqi <= 50:
+            return "Good ✅", "No precautions needed."
+        elif aqi <= 100:
+            return "Moderate 🟡", "Sensitive individuals should reduce outdoor activities."
+        elif aqi <= 200:
+            return "Unhealthy for Sensitive Groups 🟠", "Elderly & children should wear masks outside."
+        elif aqi <= 300:
+            return "Unhealthy 🔴", "Avoid outdoor exercise; wear an N95 mask."
+        elif aqi <= 400:
+            return "Very Unhealthy 🟣", "Stay indoors with air purifiers; limit outdoor movement."
+        else:
+            return "Hazardous ☠️", "Avoid going outside; use an air purifier at home."
+
+    # Function to recommend building suitability based on AQI
+    def building_suitability(aqi):
+        if aqi <= 50:
+            return "Suitable for all buildings, including hospitals, apartments, corporate offices."
+        elif aqi <= 100:
+            return "Suitable for apartments, corporate offices, government buildings; hospitals may need air filtration."
+        elif aqi <= 200:
+            return "Suitable for apartments and corporate offices; avoid hospitals and government buildings without proper air filtration."
+        elif aqi <= 300:
+            return "Not suitable for any buildings without heavy air filtration; only corporate offices with proper air systems."
+        elif aqi <= 400:
+            return "Not suitable for any buildings, especially hospitals and apartments; air filtration necessary for any construction."
+        else:
+            return "Hazardous; avoid building any structures here; only emergency facilities should be considered with heavy air filtration."
+
+    # Apply classification function and building suitability
+    area_aqi[['Impact Level', 'Precautions']] = area_aqi['AQI'].apply(lambda x: pd.Series(classify_aqi(x)))
+    area_aqi['Building Suitability'] = area_aqi['AQI'].apply(building_suitability)
+
+    # Display area-wise AQI impact, precautions, and building suitability
+    print(area_aqi[['City', 'AQI', 'Impact Level', 'Precautions', 'Building Suitability']])
+else:
+    print("No 'City' column found in dataset. Please check column names.")
