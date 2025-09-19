@@ -1,0 +1,49 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# === Step 1: Upload dataset (Only for Google Colab Users) ===
+try:
+    from google.colab import files
+    uploaded = files.upload()  # Manually upload the dataset
+    file_path = list(uploaded.keys())[0]  # Get the uploaded filename
+except ImportError:
+    # If not using Colab, use local path (modify accordingly)
+    file_path = "/mnt/data/city_day.csv"
+
+# === Step 2: Load Dataset ===
+data = pd.read_csv(file_path)
+
+# === Step 3: Define Features and Target ===
+features = ['PM2.5', 'PM10', 'NO', 'NO2', 'NOx', 'NH3', 'CO', 'SO2', 'O3', 'Benzene', 'Toluene', 'Xylene']
+target = 'AQI'
+
+# Convert AQI to numeric, forcing errors to NaN (for safety)
+data[target] = pd.to_numeric(data[target], errors='coerce')
+
+# Drop rows with missing values in selected features and target
+data_cleaned = data.dropna(subset=features + [target])
+
+# === Step 4: Split Data into Training and Testing Sets ===
+X_train, X_test, y_train, y_test = train_test_split(data_cleaned[features], data_cleaned[target], test_size=0.2, random_state=42)
+
+# === Step 5: Train the Model ===
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# === Step 6: Make Predictions ===
+y_pred = model.predict(X_test)
+
+# === Step 7: Evaluate Model Performance ===
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"Mean Squared Error: {mse:.2f}")
+print(f"R-squared Score: {r2:.4f}")
+
+# === Step 8: Predict AQI for New Data ===
+new_data = pd.DataFrame([[50, 80, 10, 25, 35, 15, 2.5, 20, 60, 5, 10, 3]], columns=features)
+predicted_aqi = model.predict(new_data)
+
+print(f'Predicted AQI: {predicted_aqi[0]:.2f}')
