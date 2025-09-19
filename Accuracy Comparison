@@ -1,0 +1,40 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# === Step 1: Accuracy metrics for Old (previous) model ===
+mae_old = 12.5
+rmse_old = 18.3
+r2_old = 0.65
+
+# === Step 2: Accuracy metrics for Your New model ===
+mae_new = 6.2
+rmse_new = 9.4
+r2_new = 0.89
+
+# === Step 3: Prepare data ===
+metrics = ['MAE', 'RMSE', 'R² Score']
+old_values = [mae_old, rmse_old, r2_old]
+new_values = [mae_new, rmse_new, r2_new]
+
+x = np.arange(len(metrics))
+width = 0.35  # Width of bars
+
+# === Step 4: Plotting comparison chart ===
+plt.figure(figsize=(10, 6))
+bars1 = plt.bar(x - width/2, old_values, width, label='Previous Model', color='lightcoral')
+bars2 = plt.bar(x + width/2, new_values, width, label='Proposed Model (Yours)', color='seagreen')
+
+plt.ylabel('Metric Value')
+plt.title('Model Accuracy Comparison')
+plt.xticks(x, metrics)
+plt.legend()
+plt.grid(True, axis='y', linestyle='--', alpha=0.6)
+
+# Annotate bar values
+for bars in [bars1, bars2]:
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height + 0.5, f'{height:.2f}', ha='center', va='bottom')
+
+plt.tight_layout()
+plt.show()
